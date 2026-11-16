@@ -3,19 +3,18 @@ services:
     name: free-llm-gateway
     runtime: python
     plan: free
-    buildCommand: pip install -r requirements.txt
+    pythonVersion: "3.12.7"
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: GATEWAY_API_KEY
         generateValue: true
-      # Recommended
       - key: GROQ_API_KEY
         sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
-      # Strong free tiers
       - key: SILICONFLOW_API_KEY
         sync: false
       - key: NVIDIA_API_KEY
@@ -24,14 +23,12 @@ services:
         sync: false
       - key: CLOUDFLARE_ACCOUNT_ID
         sync: false
-      # Provider APIs
       - key: AION_API_KEY
         sync: false
       - key: ZAI_API_KEY
         sync: false
       - key: COHERE_API_KEY
         sync: false
-      # Others
       - key: MODELSCOPE_API_KEY
         sync: false
       - key: GONKA_API_KEY
