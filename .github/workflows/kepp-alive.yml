@@ -1,0 +1,38 @@
+name: Keep Render App Awake
+
+on:
+  schedule:
+    # 9:00 AM to 9:29 AM IST (03:30 to 03:59 UTC) - runs at :30, :43, :56
+    - cron: '30,43,56 3 * * *'
+    # 9:30 AM to 10:59 PM IST (04:00 to 17:29 UTC) - runs every 13 mins
+    - cron: '*/13 4-16 * * *'
+    # 10:30 PM to 10:59 PM IST (17:00 to 17:29 UTC) - runs at :00, :13, :26
+    - cron: '0,13,26 17 * * *'
+  workflow_dispatch: # Allows you to trigger a test run manually
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Render Instance
+        env:
+          # Add RENDER_APP_URL in Repo Settings -> Secrets and variables -> Actions -> Variables
+          # Or replace ${{ vars.RENDER_APP_URL }} directly with 'https://your-app.onrender.com/health'
+          TARGET_URL: ${{ vars.RENDER_APP_URL }}
+        run: |
+          if [ -z "$TARGET_URL" ]; then
+            echo "Error: RENDER_APP_URL variable is not set."
+            exit 1
+          fi
+          
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$TARGET_URL")
+          echo "Pinged $TARGET_URL - HTTP Status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" -ge 400 ] || [ "$HTTP_STATUS" -eq 000 ]; then
+            echo "Ping failed with status $HTTP_STATUS"
+            exit 1
+          fi
